@@ -1,4 +1,4 @@
-// QuantityMeasurementApps - UC1: Feet Measurement Equality
+// QuantityMeasurementApps - UC2: Feet Measurement Equality
 package com.apps.quantityMeasurement;
 
 public class QuantityMeasurementApp {
@@ -34,20 +34,18 @@ public class QuantityMeasurementApp {
         public String toString() {
             return value + "feet";
         }
+
+        public double toInches(){
+            return value*12 ;
+        }
     }
 
-    static class Inches {
+    public static class Inches {
 
         private final double value;
 
         public Inches(double value) {
             this.value = value;
-        }
-
-        private void validate(double value) {
-            if (Double.isNaN(value)) {
-                throw new IllegalArgumentException("Inches value must be numeric");
-            }
         }
 
         @Override
@@ -61,25 +59,34 @@ public class QuantityMeasurementApp {
             Inches other = (Inches) obj;
             return Double.compare(this.value, other.value) == 0;
         }
+        public double toInches(){
+            return value ;
+        }
+
+        public static boolean compareFeetToInches(double feetValue, double inchesValue){
+            Feet feet= new Feet(feetValue);
+            Inches inches = new Inches(inchesValue);
+            return Double.compare(feet.toInches(), inches.toInches())==0;
+        }
+
     }
 
-    public static boolean checkFeetEquality(double v1, double v2) {
-        Feet f1 = new Feet(v1);
-        Feet f2 = new Feet(v2);
-        return f1.equals((f2));
+    public static void demonstrateFeetEquality() {
+        Feet f1 = new Feet(1.0);
+        Feet f2 = new Feet(1.0);
+        System.out.println(f1.equals((f2)));
     }
 
-    public static boolean checkInchesEquality(double v1, double v2) {
-        Inches i1 = new Inches(v1);
-        Inches i2 = new Inches(v2);
-        return i1.equals((i2));
+
+    public static void demonstrateInchesEquality() {
+        Inches i1 = new Inches(1.0);
+        Inches i2 = new Inches(1.0);
+        System.out.println(i1.equals((i2)));
+        System.out.println(Inches.compareFeetToInches(2.0,24.0)+"noww");
     }
 
     public static void main(String[] args) {
-
-        System.out.println("Input: 2.5inch and 2.5 inch =(" + checkInchesEquality(2.5, 2.5) + ") ");
-        System.out.println("Input: 3.5inch and 0.5 inch =(" + checkInchesEquality(3.5, 0.5) + ") ");
-        System.out.println("Feet: 1.5ft and 1.5ft =(" + checkFeetEquality(1.5, 1.5) + ") ");
-        System.out.println("Feet: 2.5ft and 1.5ft =(" + checkFeetEquality(2.5, 1.5) + ") ");
+        QuantityMeasurementApp.demonstrateFeetEquality();
+        QuantityMeasurementApp.demonstrateInchesEquality();
     }
 }
