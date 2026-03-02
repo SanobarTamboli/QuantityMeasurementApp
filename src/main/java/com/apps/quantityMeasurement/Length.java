@@ -1,94 +1,71 @@
 package com.apps.quantityMeasurement;
 
+import java.util.Objects;
+
 public class Length {
+    private final double value;
+    private final LengthUnit unit;
+    private static final double EPSILON = 1e-6;
 
-    private double value;
-
-    private LengthUnit unit;
-
-    public enum LengthUnit {
-
-        FEET(12),
-        INCHES(1),
-        YARDS(36),
-        CENTIMETERS(0.393701);
-
-        private final double conversionFactor;
-
-        LengthUnit(double conversionFactor) {
-
-            this.conversionFactor = conversionFactor;
-
-        }
-
-        public double getConversionFactor() {
-
-            return conversionFactor;
-
-        }
-
-        public double convertToBaseUnit(double value) {
-            if (Double.isNaN(value)) {
-                throw new IllegalArgumentException("Value cannot be NaN");
-            }
-            return value * conversionFactor;
-        }
-
-        public double convertFromBaseUnit(double baseValueInFeet) {
-            if (Double.isNaN(baseValueInFeet)) {
-                throw new IllegalArgumentException("Value cannot be NaN");
-            }
-            return baseValueInFeet / conversionFactor;
-        }
-
-    }
 
     public Length(double value, LengthUnit unit) {
-        if (unit == null) throw new IllegalArgumentException("Unit cannot be null");
+        if (unit == null) {
+            throw new IllegalArgumentException("Unit cannot be null");
+        }
         if (!Double.isFinite(value)) {
             throw new IllegalArgumentException("Value must be a finite number");
         }
-
         this.value = value;
         this.unit = unit;
-
     }
 
     public double getValue() {
-
         return value;
-
     }
 
     public LengthUnit getUnit() {
-
         return unit;
-
     }
 
 
-    @Override
+    public static Length add(Length l1, Length l2, LengthUnit targetUnit) {
 
+        if (l1 == null || l2 == null || targetUnit == null) {
+            throw new IllegalArgumentException("Arguments cannot be null");
+        }
+        double base1 = l1.unit.convertToBaseUnit(l1.value);
+        double base2 = l2.unit.convertToBaseUnit(l2.value);
+        double sumInFeet = base1 + base2;
+        double resultValue = targetUnit.convertFromBaseUnit(sumInFeet);
+        return new Length(resultValue, targetUnit);
+    }
+
+
+
+    public Length convert(LengthUnit targetUnit) {
+        if (targetUnit == null) {
+            throw new IllegalArgumentException();
+        }
+        double baseValue = unit.convertToBaseUnit(value);
+        double converted = targetUnit.convertFromBaseUnit(baseValue);
+        return new Length(converted, targetUnit);
+    }
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        Length other = (Length) obj;
-        double thisInFeet = this.value * this.unit.getConversionFactor();
-        double otherInFeet = other.value * other.unit.getConversionFactor();
-        return Double.compare(thisInFeet, otherInFeet) == 0;
+        if (!(obj instanceof Length other)) return false;
+        double thisInFeet = this.unit.convertToBaseUnit(this.value);
+        double otherInFeet = other.unit.convertToBaseUnit(other.value);
+        return Math.abs(thisInFeet - otherInFeet) < EPSILON;
     }
 
-    public static Length add(Length length, Length length2, LengthUnit targetUnit) {
-        if (length == null || length2 == null) {
-            throw new IllegalArgumentException("Operands cannot be null");
-        }
-        if (targetUnit == null) {
-            throw new IllegalArgumentException("Target unit cannot be null");
-        }
-        double base1 = length.getUnit().convertToBaseUnit(length.getValue());
-        double base2 = length2.getUnit().convertToBaseUnit(length2.getValue());
-        double sumInBase = base1 + base2;
-        double resultValue = targetUnit.convertFromBaseUnit(sumInBase);
-        return new Length(resultValue, targetUnit);
+    @Override
+    public int hashCode() {
+        return Objects.hash(Math.round(unit.convertToBaseUnit(value)));
+    }
+
+    @Override
+    public String toString() {
+        return value + " " + unit;
     }
 }
